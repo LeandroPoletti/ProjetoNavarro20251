@@ -1,0 +1,6 @@
+@DLQ_Projeto_HostAddress = http://localhost:5019
+
+GET {{DLQ_Projeto_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
