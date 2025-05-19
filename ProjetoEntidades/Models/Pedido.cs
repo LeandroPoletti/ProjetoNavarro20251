@@ -1,6 +1,6 @@
 ﻿namespace ProjetoEntidades.Models
 {
-    public class Pedido
+    public class Pedido : EntidadeBase
     {
         public string NomeCliente { get; set; }
         public string NomeProduto { get; set; }

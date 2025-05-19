@@ -1,6 +1,8 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
-using ProjetoEntidades.Models;
+using Pedido.Infra;
+using Pedido.Infra.Interfaces;
+
 
 namespace DLQ_Projeto.Controllers
 {
@@ -8,13 +10,19 @@ namespace DLQ_Projeto.Controllers
     [Route("api/[controller]")]
     public class PedidosController : ControllerBase
     {
-        
+        private readonly IRepositorio _repositorio;
+
+        public PedidosController(IRepositorio repositorio)
+        {
+            _repositorio = repositorio;
+        }
 
         [HttpPost]
-        public IActionResult CriarPedido([FromBody] Pedido pedido)
+        public IActionResult CriarPedido([FromBody] ProjetoEntidades.Models.Pedido pedido)
         {
+            var res = _repositorio.Adicionar<ProjetoEntidades.Models.Pedido>(pedido);
             
-            return Ok("Pedido enviado para processamento.");
+            return res > 0 ? Ok("Pedido enviado para processamento.") :  BadRequest("ERRO");
         }
     }
 }

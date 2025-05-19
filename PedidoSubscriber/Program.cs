@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using System.Net;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
@@ -35,7 +36,7 @@ namespace DLQ_Projeto.Services
             channel.QueueBind(MainQueue, MainExchange, routingKey: "info");
 
             var consumer = new EventingBasicConsumer(channel);
-            consumer.Received += (model, ea) =>
+            consumer.Received += async (model, ea) =>
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
@@ -49,7 +50,16 @@ namespace DLQ_Projeto.Services
                 }
                 else
                 {
+                    using var client = new HttpClient();
+                    var res = await client.PostAsync("http://localhost:5019/api/pedidos", new StringContent(JsonSerializer.Serialize(item), Encoding.UTF8, "application/json"));
+                    if (res.StatusCode == HttpStatusCode.OK)
+                    {
                     channel.BasicAck(ea.DeliveryTag, false); // Confirma processamento
+                    }
+                    else
+                    {
+                        channel.BasicNack(ea.DeliveryTag, false, false); // Não confirma, vai para DLQ
+                    }
                 }
 
                 //Fazer request pro projeto api receiver
